@@ -30,7 +30,7 @@
 #include "gps.h"
 #include "misc.h"
 
-#define RELEASE_GPIO 7 // Choose an appropriate GPIO pin - Needs to be off by default so that the burn wire doesn't activate prematurely.
+#define RELEASE_GPIO 25 // Choose an appropriate GPIO pin - Needs to be off by default so that the burn wire doesn't activate prematurely.
 #define BURN_LIMIT 10
 
 void *ReleaseLoop(void *some_void_ptr)
@@ -40,21 +40,23 @@ void *ReleaseLoop(void *some_void_ptr)
 	GPS = (struct TGPS *)some_void_ptr;
 
     // Code for sending a command to camera.
-    char command[50];
-    strcpy( command, "dir" );
-    system(command);
-
+    // char command[50];
+    // strcpy( command, "dir" );
+    // system(command);
+	int startTime = (unsigned)time(NULL);
 	// This sets the GPIO pin to output mode to enable the TIP122 in the burn wire circuitry.
 	pinMode (RELEASE_GPIO, OUTPUT);
 
 	while (1) {
         // Will turn on the burn wire when the balloon reaches an altitude of 30km or if the balloon starts descending prematurely.
         // Need to change to conditionals to include camera functionality.
-		digitalWrite(RELEASE_GPIO, (GPS->Altitude >= 30000) || ((GPS->Altitude < prevAlt) && (GPS->Altitude > 2000)));
-        sleep(BURN_LIMIT);
-        digitalWrite(RELEASE_GPIO, 0);
-
-        prevAlt = GPS->Altitude; // Set previous altitude to check that the ballon is still ascending.
+		// digitalWrite(RELEASE_GPIO, (GPS->Altitude >= 30000) || ((GPS->Altitude < prevAlt) && (GPS->Altitude > 2000)));
+        // sleep(BURN_LIMIT);
+        // digitalWrite(RELEASE_GPIO, 0);
+        // prevAlt = GPS->Altitude; // Set previous altitude to check that the ballon is still ascending.
+		if(((unsigned)time(NULL) - startTime) > 10){
+			digitalWrite(RELEASE_GPIO,1);
+		}
 		sleep(1);
 	}
 
