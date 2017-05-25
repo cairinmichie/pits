@@ -48,6 +48,7 @@ void *ReleaseLoop(void *some_void_ptr)
 
 	// This sets the GPIO pin to output mode to enable the TIP122 in the burn wire circuitry.
 	pinMode (RELEASE_GPIO, OUTPUT);
+	pinMode (TEST, OUTPUT);
 	while (1) {
         // Will turn on the burn wire when the balloon reaches an altitude of 30km or if the balloon starts descending prematurely.
 		// Reached release altitude?
