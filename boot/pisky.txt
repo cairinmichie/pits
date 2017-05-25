@@ -2,7 +2,7 @@ payload=CHANGEME
 disable_monitor=N
 frequency=434.250
 baud=300
-camera=Y
+camera=N
 low_width=320
 low_height=240
 high=2000
@@ -34,4 +34,3 @@ APRS_Random=5
 #LORA_Frequency_1=434.275
 #LORA_Payload_1=CHANGEME
 #LORA_Mode_1=1
-
