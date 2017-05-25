@@ -26,6 +26,7 @@
 #include <pigpio.h>
 #include <inttypes.h>
 #include <time.h>
+#include <stdbool.h>
 
 #include "gps.h"
 #include "misc.h"
