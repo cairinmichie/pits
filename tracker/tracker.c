@@ -53,6 +53,7 @@
 #include "pipe.h"
 #include "prediction.h"
 #include "log.h"
+#include "release.h"
 #ifdef EXTRAS_PRESENT
 #	include "ex_tracker.h"
 #endif
