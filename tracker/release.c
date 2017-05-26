@@ -44,7 +44,7 @@ void *ReleaseLoop(void *some_void_ptr)
 
     // Code for sending a command to camera.
     char command[50];
-    strcpy( command, "raspivid -t 30000 -w 1280 -h 720 -fps 60 -o pivideo.h264 &" ); // & necessary otherwise system will wait for command to complete.
+    strcpy( command, "raspivid -t 30000 -w 1280 -h 720 -fps 60 -o pivideo.h264 & disown" ); // & necessary otherwise system will wait for command to complete.
 
 	// This sets the GPIO pin to output mode to enable the TIP122 in the burn wire circuitry.
 	pinMode (RELEASE_GPIO, OUTPUT);
@@ -64,7 +64,7 @@ void *ReleaseLoop(void *some_void_ptr)
 		// Burst?
 		else if (GPS->FlightMode >= fmBurst) {
 			if(!burnt){
-				system(command);
+				system(command); // Signal is returned causing sleep to end prematurely. try disown otherwise http://man7.org/linux/man-pages/man2/nanosleep.2.html
 				digitalWrite(RELEASE_GPIO, 1);
 				sleep(BURN_LIMIT);
 				digitalWrite(RELEASE_GPIO, 0);
@@ -75,6 +75,7 @@ void *ReleaseLoop(void *some_void_ptr)
 		if(!burnt){
 			digitalWrite(TEST, 1);
 			system(command);
+			sleep(BURN_LIMIT);
 			digitalWrite(TEST, 0);
 			burnt = true;
 		}
