@@ -879,11 +879,11 @@ int main(void)
 		}
 	}
 
-	// if (pthread_create(&LEDThread, NULL, LEDLoop, &GPS))
-	// {
-	// 	fprintf(stderr, "Error creating LED thread\n");
-	// 	return 1;
-	// }
+	if (pthread_create(&LEDThread, NULL, LEDLoop, &GPS))
+	{
+		fprintf(stderr, "Error creating LED thread\n");
+		return 1;
+	}
 
 	if (Config.TelemetryFileUpdate > 0)
 	{
