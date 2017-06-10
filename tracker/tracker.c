@@ -805,11 +805,11 @@ int main(void)
 		return 1;
 	}
 
-    if (pthread_create(&ReleaseThread, NULL, ReleaseLoop, &GPS))
-	{
-		fprintf(stderr, "Error creating MIRKA2 Release thread\n");
-		return 1;
-	}
+    // if (pthread_create(&ReleaseThread, NULL, ReleaseLoop, &GPS))
+	// {
+	// 	fprintf(stderr, "Error creating MIRKA2 Release thread\n");
+	// 	return 1;
+	// }
 
 	if (*(Config.APRS_Callsign) && Config.APRS_ID && Config.APRS_Period)
 	{
