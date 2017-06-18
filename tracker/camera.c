@@ -28,7 +28,7 @@
 
 #define BURST_ALT 30000
 #define PHOTO 4
-#define VIDEO 4
+#define VIDEO 5
 
 void *CameraLoop(void *some_void_ptr)
 {
@@ -36,12 +36,8 @@ void *CameraLoop(void *some_void_ptr)
 	GPS = (struct TGPS *)some_void_ptr;
 	bool burnt = false;
 
-      int n, a=5, b=3;
-      n=sprintf (buffer, "%d plus %d is %d", a, b, a+b);
-
     // Code for sending a command to camera.
     char PhotoCommand[50];
-    fprintf(fp, "raspistill -st -w 2592 -h 1944 -t 3000 -ex auto -mm matrix %s -o %s\n", width, height, Config.CameraSettings, FileName);
     sprintf( PhotoCommand, "raspistill -st -w 2592 -h 1944 -t 3000 -ex auto -mm matrix -o %s.jpg", FileName);
     char VideoCommand[50];
     sprintf( VideoCommand, "raspivid -t 180000 -w 1280 -h 720 -fps 60 -o pivideo.h264 & disown");
@@ -59,21 +55,34 @@ void *CameraLoop(void *some_void_ptr)
 				digitalWrite(VIDEO, 1); // handled as an interrupt - can immediately set to zero again.
 				digitalWrite(VIDEO, 0);
 				burnt = true;
+				sleep(185); // Ensure 3 minutes of Video
 			}
 		}
-		// Burst? Takes GPS and pressure into account.
+		// Prem-burst? Takes GPS and pressure into account.
 		else if (GPS->FlightMode >= fmBurst) {
 			if(!burnt){
 				system(VideoCommand);
 				digitalWrite(VIDEO, 1); // handled as an interrupt - can immediately set to zero again.
 				digitalWrite(VIDEO, 0);
 				burnt = true;
+				sleep(185); // Ensure 3 minutes of Video
 			}
 		}
         else {
-
-            sleep(1);
+			if(!burnt){
+				system(PhotoCommand);
+				digitalWrite(PHOTO, 1); // handled as an interrupt - can immediately set to zero again.
+				digitalWrite(PHOTO, 0);
+				sleep(60); // Take photo every minute.
+			}
         }
+
+		if (burnt) {
+			system(PhotoCommand);
+			digitalWrite(PHOTO, 1); // handled as an interrupt - can immediately set to zero again.
+			digitalWrite(PHOTO, 0);
+			sleep(60); // Take photo every minute.
+		}
 
 	}
 
