@@ -52,26 +52,29 @@ void *CameraLoop(void *some_void_ptr)
 		if (GPS->Altitude > BURST_ALT) {
 			if(!burnt){
 				system(VideoCommand);
-				digitalWrite(VIDEO, 1); // handled as an interrupt - can immediately set to zero again.
+				digitalWrite(VIDEO, 1); // handled as an interrupt.
+				sleep(1);
 				digitalWrite(VIDEO, 0);
 				burnt = true;
-				sleep(185); // Ensure 3 minutes of Video
+				sleep(184); // Ensure 3 minutes of Video
 			}
 		}
 		// Prem-burst? Takes GPS and pressure into account.
 		else if (GPS->FlightMode >= fmBurst) {
 			if(!burnt){
 				system(VideoCommand);
-				digitalWrite(VIDEO, 1); // handled as an interrupt - can immediately set to zero again.
+				digitalWrite(VIDEO, 1); // handled as an interrupt.
+				sleep(1);
 				digitalWrite(VIDEO, 0);
 				burnt = true;
-				sleep(185); // Ensure 3 minutes of Video
+				sleep(184); // Ensure 3 minutes of Video
 			}
 		}
         else {
 			if(!burnt){
 				system(PhotoCommand);
 				digitalWrite(PHOTO, 1); // handled as an interrupt - can immediately set to zero again.
+				sleep(1);
 				digitalWrite(PHOTO, 0);
 				sleep(60); // Take photo every minute.
 			}
@@ -80,6 +83,7 @@ void *CameraLoop(void *some_void_ptr)
 		if (burnt) {
 			system(PhotoCommand);
 			digitalWrite(PHOTO, 1); // handled as an interrupt - can immediately set to zero again.
+			sleep(1);
 			digitalWrite(PHOTO, 0);
 			sleep(60); // Take photo every minute.
 		}

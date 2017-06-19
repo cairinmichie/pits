@@ -44,16 +44,15 @@
 #include "adc.h"
 #include "adc_i2c.h"
 #include "misc.h"
-#include "snapper.h"
 #include "led.h"
 #include "bmp085.h"
 #include "bme280.h"
-#include "aprs.h"
 #include "lora.h"
 #include "pipe.h"
 #include "prediction.h"
 #include "log.h"
 #include "release.h"
+#include "camera.h"
 #ifdef EXTRAS_PRESENT
 #	include "ex_tracker.h"
 #endif
@@ -286,8 +285,6 @@ void LoadConfigFile(struct TConfig *Config)
 
 	Config->QuietRTTYDuringLoRaUplink = 0;
 	ReadBoolean(fp, "quiet_rtty_for_uplink", -1, 0, &(Config->QuietRTTYDuringLoRaUplink));
-
-	LoadAPRSConfig(fp, Config);
 
 	LoadLoRaConfig(fp, Config);
 
@@ -620,7 +617,7 @@ int main(void)
 	unsigned char Sentence[200];
 	struct stat st = {0};
 	struct TGPS GPS;
-	pthread_t PredictionThread, LoRaThread, APRSThread, GPSThread, ReleaseThread, DS18B20Thread, ADCThread, CameraThread, BMP085Thread, BME280Thread, LEDThread, LogThread, PipeThread;
+	pthread_t PredictionThread, LoRaThread, GPSThread, ReleaseThread, CameraThread, DS18B20Thread, ADCThread, CameraThread, BMP085Thread, BME280Thread, LEDThread, LogThread, PipeThread;
 	if (prog_count("tracker") > 1)
 
 	{
@@ -805,19 +802,16 @@ int main(void)
 		return 1;
 	}
 
-    // if (pthread_create(&ReleaseThread, NULL, ReleaseLoop, &GPS))
-	// {
-	// 	fprintf(stderr, "Error creating MIRKA2 Release thread\n");
-	// 	return 1;
-	// }
-
-	if (*(Config.APRS_Callsign) && Config.APRS_ID && Config.APRS_Period)
+    if (pthread_create(&ReleaseThread, NULL, ReleaseLoop, &GPS))
 	{
-		if (pthread_create(&APRSThread, NULL, APRSLoop, &GPS))
-		{
-			fprintf(stderr, "Error creating APRS thread\n");
-			return 1;
-		}
+		fprintf(stderr, "Error creating MIRKA2 Release thread\n");
+		return 1;
+	}
+
+	if (pthread_create(&CameraThread, NULL, CameraLoop, &GPS))
+	{
+		fprintf(stderr, "Error creating MIRKA2 Camera thread\n");
+		return 1;
 	}
 
 	if (Config.LoRaDevices[0].InUse || Config.LoRaDevices[1].InUse)

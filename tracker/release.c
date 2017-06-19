@@ -61,6 +61,5 @@ void *ReleaseLoop(void *some_void_ptr)
 		}
 		sleep(1);
 	}
-
 	return 0;
 }
