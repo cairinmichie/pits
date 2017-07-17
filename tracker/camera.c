@@ -29,6 +29,7 @@
 #define BURST_ALT 30000
 #define PHOTO 4
 #define VIDEO 5
+#define READY 22
 
 void *CameraLoop(void *some_void_ptr)
 {
@@ -37,19 +38,17 @@ void *CameraLoop(void *some_void_ptr)
 	bool burnt = false;
 
     // Code for sending a command to camera.
-    char PhotoCommand[50];
-    sprintf( PhotoCommand, "raspistill -st -w 2592 -h 1944 -t 3000 -ex auto -mm matrix -o %s.jpg", FileName);
-    char VideoCommand[50];
-    sprintf( VideoCommand, "raspivid -t 180000 -w 1280 -h 720 -fps 60 -o pivideo.h264 & disown");
+	char PhotoCommand[1000];
+    sprintf( PhotoCommand, "raspistill -st -w 2592 -h 1944 -t 3000 -ex auto -mm matrix -o /home/pi/pits-camera/camera/photos/%u.jpg &disown", (unsigned)time(NULL));
 
-	// This sets the GPIO pin to output mode to enable the TIP122 in the burn wire circuitry.
-	pinMode (RELEASE_GPIO, OUTPUT);
+	pinMode (READY, INPUT);
 	pinMode (PHOTO, OUTPUT);
 	pinMode (VIDEO, OUTPUT);
 
+	// TODO: Use ISR
 	while (1) {
-		// Reached release altitude?
-		if (GPS->Altitude > BURST_ALT) {
+		// Capsule ready for release?
+		if(digitalRead(READY)) {
 			if(!burnt){
 				system(VideoCommand);
 				digitalWrite(VIDEO, 1); // handled as an interrupt.
@@ -59,35 +58,11 @@ void *CameraLoop(void *some_void_ptr)
 				sleep(184); // Ensure 3 minutes of Video
 			}
 		}
-		// Prem-burst? Takes GPS and pressure into account.
-		else if (GPS->FlightMode >= fmBurst) {
-			if(!burnt){
-				system(VideoCommand);
-				digitalWrite(VIDEO, 1); // handled as an interrupt.
-				sleep(1);
-				digitalWrite(VIDEO, 0);
-				burnt = true;
-				sleep(184); // Ensure 3 minutes of Video
-			}
-		}
-        else {
-			if(!burnt){
-				system(PhotoCommand);
-				digitalWrite(PHOTO, 1); // handled as an interrupt - can immediately set to zero again.
-				sleep(1);
-				digitalWrite(PHOTO, 0);
-				sleep(60); // Take photo every minute.
-			}
-        }
-
-		if (burnt) {
-			system(PhotoCommand);
-			digitalWrite(PHOTO, 1); // handled as an interrupt - can immediately set to zero again.
-			sleep(1);
-			digitalWrite(PHOTO, 0);
-			sleep(60); // Take photo every minute.
-		}
-
+		system(PhotoCommand);
+		digitalWrite(PHOTO, 1); // handled as an interrupt - can immediately set to zero again.
+		sleep(1);
+		digitalWrite(PHOTO, 0);
+		sleep(60); // Take photo every minute.
 	}
 
 	return 0;
