@@ -30,16 +30,13 @@
 #define READY 22 // set hi to allow flight computer to know if capsule is ready for release.
 #define RELEASE 23 // in case of emergency release.
 #define DEAD 21 // If NOGO response is received.
-#define BURN_LIMIT 10
+#define BURN_LIMIT 5
 #define BURST_ALT 25000
 #define MIN_ALT 15000
 
 void releasefunc(void) {
 	// The capsule is ready for release and release conditions are met, so release.
-	
-	char VideoCommand[1000];
-    sprintf( VideoCommand, "raspivid -t 180000 -w 1280 -h 720 -fps 60 -o /home/pi/pits-camera/camera/video/%u.h264 &disown", (unsigned)time(NULL));
-
+	GPS->Burn = 'Y';
 	digitalWrite(RELEASE_GPIO, 1);
 	sleep(BURN_LIMIT);
 	digitalWrite(RELEASE_GPIO, 0);
@@ -50,6 +47,8 @@ void *ReleaseLoop(void *some_void_ptr)
 	struct TGPS *GPS;
 	GPS = (struct TGPS *)some_void_ptr;
 	bool burnt = false;
+	GPS->Health = 'H';
+	GPS->Burn = 'N';
 
 	// This sets the GPIO pin to output mode to enable the TIP122 in the burn wire circuitry.
 	pinMode (RELEASE_GPIO, OUTPUT);
@@ -61,7 +60,7 @@ void *ReleaseLoop(void *some_void_ptr)
 	while (1) {
         // Will turn on the burn wire when the balloon reaches an altitude of 30km or if the balloon starts descending prematurely. Checks the balloon is above the useful altitude limit.
 		if (GPS->Altitude > BURST_ALT && GPS->Altitude > MIN_ALT) {
-			if(!burnt && digitalRead(DEAD) == 0){
+			if(!burnt && GPS->Health == 'H'){
 				digitalWrite(RELEASE, 1);
 				sleep(2);
 				burnt = true;
@@ -70,12 +69,18 @@ void *ReleaseLoop(void *some_void_ptr)
 		}
 		// Burst?
 		else if (GPS->FlightMode >= fmBurst && GPS->Altitude > MIN_ALT) {
-			if(!burnt && digitalRead(DEAD) == 0){
+			if(!burnt && GPS->Health == 'H'){
 				digitalWrite(RELEASE, 1); // to activate the camera
 				sleep(2);
 				burnt = true;
 				digitalWrite(RELEASE, 0);
 			}
+		}
+		if(digitalRead(DEAD) > 0) {
+			GPS->Health = 'D';
+		}
+		else if(digitalRead(DEAD) == 0) {
+			GPS->Health = 'H';
 		}
 		sleep(1);
 	}

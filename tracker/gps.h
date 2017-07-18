@@ -12,11 +12,11 @@ struct TGPS
 	unsigned int Satellites;
 	int Speed;
 	int Direction;
-	
+
 	// Calculated from GPS
 	int32_t MaximumAltitude, MinimumAltitude;
 	float AscentRate;
-	
+
 	// Sensors
 	float DS18B20Temperature[2];
 	float BatteryVoltage;
@@ -25,16 +25,18 @@ struct TGPS
 	float Pressure;
 	float BoardCurrent;
 	int DS18B20Count;
+	char Health;
+	char Burn;
 
 	// Flight control
 	TFlightMode FlightMode;
-	
+
 	// Prediction
 	float PredictedLongitude, PredictedLatitude;
 	float PredictedLandingSpeed;
 	int TimeTillLanding;
 	float CDA;
-		
+
 	// int FlightMode;
 	// int PowerMode;
 	// int Lock;
@@ -42,7 +44,7 @@ struct TGPS
 
 #	ifdef EXTRAS_PRESENT
 #		include "ex_gps.h"
-#	endif		
+#	endif
 } GPS;
 
 
@@ -52,5 +54,4 @@ void *GPSLoop(void *some_void_ptr);
 
 #ifdef EXTRAS_PRESENT
 void gps_postprocess_position(struct TGPS *GPS, int ActionMask);
-#endif	
-
+#endif

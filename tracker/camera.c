@@ -40,6 +40,8 @@ void *CameraLoop(void *some_void_ptr)
     // Code for sending a command to camera.
 	char PhotoCommand[1000];
     sprintf( PhotoCommand, "raspistill -st -w 2592 -h 1944 -t 3000 -ex auto -mm matrix -o /home/pi/pits-camera/camera/photos/%u.jpg &disown", (unsigned)time(NULL));
+	char VideoCommand[1000];
+    sprintf( VideoCommand, "raspivid -t 180000 -w 1280 -h 720 -fps 60 -o /home/pi/pits-camera/camera/video/%u.h264 &disown", (unsigned)time(NULL));
 
 	pinMode (READY, INPUT);
 	pinMode (PHOTO, OUTPUT);
