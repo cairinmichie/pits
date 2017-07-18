@@ -81,6 +81,10 @@ void *ReleaseLoop(void *some_void_ptr)
 		else if(digitalRead(TEST) == 1){
 			digitalWrite(RELEASE, 1);
 			GPS->Burn = 'Y';
+
+			digitalWrite(RELEASE_GPIO, 1);
+			sleep(BURN_LIMIT);
+			digitalWrite(RELEASE_GPIO, 0);
 			sleep(2);
 			burnt = true;
 			digitalWrite(RELEASE, 0);
