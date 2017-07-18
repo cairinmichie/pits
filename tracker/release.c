@@ -36,7 +36,6 @@
 
 void releasefunc(void) {
 	// The capsule is ready for release and release conditions are met, so release.
-	GPS->Burn = 'Y';
 	digitalWrite(RELEASE_GPIO, 1);
 	sleep(BURN_LIMIT);
 	digitalWrite(RELEASE_GPIO, 0);
@@ -62,6 +61,7 @@ void *ReleaseLoop(void *some_void_ptr)
 		if (GPS->Altitude > BURST_ALT && GPS->Altitude > MIN_ALT) {
 			if(!burnt && GPS->Health == 'H'){
 				digitalWrite(RELEASE, 1);
+				GPS->Burn = 'Y';
 				sleep(2);
 				burnt = true;
 				digitalWrite(RELEASE, 0);
@@ -70,7 +70,8 @@ void *ReleaseLoop(void *some_void_ptr)
 		// Burst?
 		else if (GPS->FlightMode >= fmBurst && GPS->Altitude > MIN_ALT) {
 			if(!burnt && GPS->Health == 'H'){
-				digitalWrite(RELEASE, 1); // to activate the camera
+				digitalWrite(RELEASE, 1);
+				GPS->Burn = 'Y';
 				sleep(2);
 				burnt = true;
 				digitalWrite(RELEASE, 0);
