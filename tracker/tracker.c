@@ -617,7 +617,7 @@ int main(void)
 	unsigned char Sentence[200];
 	struct stat st = {0};
 	struct TGPS GPS;
-	pthread_t PredictionThread, LoRaThread, GPSThread, ReleaseThread, CameraThread, DS18B20Thread, ADCThread, CameraThread, BMP085Thread, BME280Thread, LEDThread, LogThread, PipeThread;
+	pthread_t PredictionThread, LoRaThread, GPSThread, ReleaseThread, DS18B20Thread, ADCThread, CameraThread, BMP085Thread, BME280Thread, LEDThread, LogThread, PipeThread;
 	if (prog_count("tracker") > 1)
 
 	{
