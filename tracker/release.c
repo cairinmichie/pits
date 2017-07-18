@@ -77,7 +77,7 @@ void *ReleaseLoop(void *some_void_ptr)
 				digitalWrite(RELEASE, 0);
 			}
 		}
-		if(digitalRead(DEAD) > 0) {
+		if(digitalRead(DEAD) == 1) {
 			GPS->Health = 'D';
 		}
 		else if(digitalRead(DEAD) == 0) {
