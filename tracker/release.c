@@ -33,6 +33,7 @@
 #define BURN_LIMIT 5
 #define BURST_ALT 25000
 #define MIN_ALT 15000
+#define TEST 0
 
 void releasefunc(void) {
 	// The capsule is ready for release and release conditions are met, so release.
@@ -76,6 +77,13 @@ void *ReleaseLoop(void *some_void_ptr)
 				burnt = true;
 				digitalWrite(RELEASE, 0);
 			}
+		}
+		else if(digitalRead(TEST) == 1){
+			digitalWrite(RELEASE, 1);
+			GPS->Burn = 'Y';
+			sleep(2);
+			burnt = true;
+			digitalWrite(RELEASE, 0);
 		}
 		if(digitalRead(DEAD) == 1) {
 			GPS->Health = 'D';
