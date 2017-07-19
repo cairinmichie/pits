@@ -85,7 +85,7 @@ void *ReleaseLoop(void *some_void_ptr)
 			}
 		}
 		// Passing out of flight zone so must release.
-		else if (GPS->longitude >= 20.0 && GPS->Altitude > MIN_ALT) {
+		else if (GPS->Longitude >= 20.0 && GPS->Altitude > MIN_ALT) {
 			if(!burnt && GPS->Health == 'H'){
 				digitalWrite(RELEASE, 1);
 				GPS->Burn = 'Y';
