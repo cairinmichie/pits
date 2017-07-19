@@ -30,17 +30,10 @@
 #define READY 22 // set hi to allow flight computer to know if capsule is ready for release.
 #define RELEASE 23 // in case of emergency release.
 #define DEAD 21 // If NOGO response is received.
-#define BURN_LIMIT 5
+#define BURN_LIMIT 10
 #define BURST_ALT 25000
 #define MIN_ALT 15000
-#define TEST 0
-
-void releasefunc(void) {
-	// The capsule is ready for release and release conditions are met, so release.
-	digitalWrite(RELEASE_GPIO, 1);
-	sleep(BURN_LIMIT);
-	digitalWrite(RELEASE_GPIO, 0);
-}
+#define RELEASE_GPIO_2 0
 
 void *ReleaseLoop(void *some_void_ptr)
 {
@@ -49,46 +42,81 @@ void *ReleaseLoop(void *some_void_ptr)
 	bool burnt = false;
 	GPS->Health = 'H';
 	GPS->Burn = 'N';
+	unsigned int releaseTime = 0;
 
 	// This sets the GPIO pin to output mode to enable the TIP122 in the burn wire circuitry.
 	pinMode (RELEASE_GPIO, OUTPUT);
 	pinMode (READY, INPUT);
 	pinMode (DEAD, INPUT);
 	pinMode (RELEASE, OUTPUT);
+	pinMode (RELEASE_GPIO_2, OUTPUT);
 
-	wiringPiISR(READY, INT_EDGE_RISING, &releasefunc);
+	digitalWrite(RELEASE, 0);
+	digitalWrite(RELEASE_GPIO, 0);
+	digitalWrite(RELEASE_GPIO_2, 0);
+
 	while (1) {
         // Will turn on the burn wire when the balloon reaches an altitude of 30km or if the balloon starts descending prematurely. Checks the balloon is above the useful altitude limit.
 		if (GPS->Altitude > BURST_ALT && GPS->Altitude > MIN_ALT) {
 			if(!burnt && GPS->Health == 'H'){
 				digitalWrite(RELEASE, 1);
 				GPS->Burn = 'Y';
-				sleep(2);
+				sleep(60);
+				digitalWrite(RELEASE_GPIO, 1);
+				sleep(BURN_LIMIT);
+				digitalWrite(RELEASE_GPIO, 0);
 				burnt = true;
 				digitalWrite(RELEASE, 0);
+				releaseTime = (unsigned)time(NULL);
 			}
 		}
 		// Burst?
-		else if (GPS->FlightMode >= fmBurst && GPS->Altitude > MIN_ALT) {
+		else if (GPS->FlightMode == fmBurst && GPS->Altitude > MIN_ALT) {
 			if(!burnt && GPS->Health == 'H'){
 				digitalWrite(RELEASE, 1);
 				GPS->Burn = 'Y';
-				sleep(2);
+				sleep(60);
+				digitalWrite(RELEASE_GPIO, 1);
+				sleep(BURN_LIMIT);
+				digitalWrite(RELEASE_GPIO, 0);
 				burnt = true;
 				digitalWrite(RELEASE, 0);
+				releaseTime = (unsigned)time(NULL);
 			}
 		}
-		else if(digitalRead(TEST) == 1){
+		// Passing out of flight zone so must release.
+		else if (GPS->longitude >= 20.0 && GPS->Altitude > MIN_ALT) {
+			if(!burnt && GPS->Health == 'H'){
+				digitalWrite(RELEASE, 1);
+				GPS->Burn = 'Y';
+				sleep(60);
+				digitalWrite(RELEASE_GPIO, 1);
+				sleep(BURN_LIMIT);
+				digitalWrite(RELEASE_GPIO, 0);
+				burnt = true;
+				digitalWrite(RELEASE, 0);
+				releaseTime = (unsigned)time(NULL);
+			}
+		}
+
+		// Release payload 5 minutes after capsule.
+		if((releaseTime + 300 <= (unsigned)time(NULL)) && burnt) {
+			digitalWrite(RELEASE_GPIO_2, 1);
+			sleep(BURN_LIMIT);
+			sleep(BURN_LIMIT);
+			digitalWrite(RELEASE_GPIO_2, 0);
+		}
+
+		if(digitalRead(READY) == 1){
 			digitalWrite(RELEASE, 1);
 			GPS->Burn = 'Y';
-
 			digitalWrite(RELEASE_GPIO, 1);
 			sleep(BURN_LIMIT);
 			digitalWrite(RELEASE_GPIO, 0);
-			sleep(2);
 			burnt = true;
 			digitalWrite(RELEASE, 0);
 		}
+
 		if(digitalRead(DEAD) == 1) {
 			GPS->Health = 'D';
 		}
