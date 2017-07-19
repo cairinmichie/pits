@@ -107,7 +107,9 @@ void *ReleaseLoop(void *some_void_ptr)
 			digitalWrite(RELEASE_GPIO_2, 0);
 		}
 
-		if(digitalRead(READY) == 1){
+
+// TEST BLOCK STARTS
+		if(digitalRead(READY) == 0) {
 			digitalWrite(RELEASE, 1);
 			GPS->Burn = 'Y';
 			digitalWrite(RELEASE_GPIO, 1);
@@ -116,6 +118,7 @@ void *ReleaseLoop(void *some_void_ptr)
 			burnt = true;
 			digitalWrite(RELEASE, 0);
 		}
+// TEST BLOCK ENDS
 
 		if(digitalRead(DEAD) == 1) {
 			GPS->Health = 'D';
