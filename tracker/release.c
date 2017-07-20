@@ -116,7 +116,8 @@ void *ReleaseLoop(void *some_void_ptr)
 			sleep(BURN_LIMIT);
 			digitalWrite(RELEASE_GPIO, 0);
 			burnt = true;
-			digitalWrite(RELEASE, 0);
+            digitalWrite(RELEASE, 0);
+            releaseTime = (unsigned)time(NULL);
 		}
 // TEST BLOCK ENDS
 
